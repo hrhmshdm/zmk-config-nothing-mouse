@@ -1,0 +1,64 @@
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/bt.h>
+#include <dt-bindings/zmk/pointing.h>
+
+/ {
+    behaviors {
+        /* モードボタン用: 短押しで接続先切替、2秒(2000ms)長押しでペアリングクリア */
+        bt_mode: bt_mode_hold_tap {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <2000>;
+            bindings = <&bt>, <&bt>;
+        };
+
+        /* ホイール縦スクロール（エンコーダ回転用） */
+        rot_msc_v: sensor_rotate_msc_v {
+            compatible = "zmk,behavior-sensor-rotate-var";
+            #sensor-binding-cells = <2>;
+            bindings = <&msc>, <&msc>;
+            tap-ms = <20>;
+        };
+
+        /* ホイール横スクロール（サイドボタン押下中のエンコーダ回転用） */
+        rot_msc_h: sensor_rotate_msc_h {
+            compatible = "zmk,behavior-sensor-rotate-var";
+            #sensor-binding-cells = <2>;
+            bindings = <&msc>, <&msc>;
+            tap-ms = <20>;
+        };
+    };
+
+    keymap {
+        compatible = "zmk,keymap";
+
+        /* 通常レイヤー (Layer 0) */
+        default_layer {
+            /* 順番: SW1(左), SW2(右), SW3(中), SW4(短押し:戻る / 長押し:Layer1), SW5(短押し:BT次へ / 長押し:BTクリア) */
+            bindings = <
+                &mkp LCLK
+                &mkp RCLK
+                &mkp MCLK
+                &lt 1 MB4
+                &bt_mode BT_CLR BT_NXT
+            >;
+            /* 通常時のエンコーダ: 縦スクロール */
+            sensor-bindings = <&rot_msc_v SCRL_DOWN SCRL_UP>;
+        };
+
+        /* サイドボタン押下中レイヤー (Layer 1) */
+        scroll_layer {
+            bindings = <
+                &trans
+                &trans
+                &trans
+                &trans
+                &trans
+            >;
+            /* サイドボタン押下中のエンコーダ: 横スクロール */
+            sensor-bindings = <&rot_msc_h SCRL_RIGHT SCRL_LEFT>;
+        };
+    };
+};
