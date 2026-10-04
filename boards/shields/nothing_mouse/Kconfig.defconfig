@@ -1,0 +1,6 @@
+if SHIELD_NOTHING_MOUSE
+
+config ZMK_KEYBOARD_NAME
+    default "Nothing Mouse"
+
+endif
