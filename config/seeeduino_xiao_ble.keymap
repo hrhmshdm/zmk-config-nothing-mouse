@@ -5,12 +5,13 @@
 
 / {
     macros {
-        bt_nxt_macro: bt_nxt_macro {
+        bt_nxt_m: bt_nxt_macro {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             bindings = <&bt BT_NXT>;
         };
-        bt_clr_macro: bt_clr_macro {
+
+        bt_clr_m: bt_clr_macro {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             bindings = <&bt BT_CLR>;
@@ -18,7 +19,6 @@
     };
 
     behaviors {
-        /* サイドボタン用: 押しながらでレイヤー1(&mo)、短押しでマウスボタン(&mkp) */
         lt_mkp: layer_tap_mouse_kp {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
@@ -27,17 +27,22 @@
             bindings = <&mo>, <&mkp>;
         };
 
-        /* モードボタン用: 2秒長押しでペアリング解除、短押しで次の接続先へ */
         bt_mode: bt_mode_hold_tap {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
             flavor = "tap-preferred";
             tapping-term-ms = <2000>;
-            bindings = <&bt_clr_macro>, <&bt_nxt_macro>;
+            bindings = <&bt_clr_m>, <&bt_nxt_m>;
         };
 
-        /* ホイール縦・横スクロール用（エンコーダ回転） */
-        rot_msc: sensor_rotate_msc {
+        rot_msc_v: sensor_rotate_msc_v {
+            compatible = "zmk,behavior-sensor-rotate-var";
+            #sensor-binding-cells = <2>;
+            bindings = <&msc>, <&msc>;
+            tap-ms = <20>;
+        };
+
+        rot_msc_h: sensor_rotate_msc_h {
             compatible = "zmk,behavior-sensor-rotate-var";
             #sensor-binding-cells = <2>;
             bindings = <&msc>, <&msc>;
@@ -53,10 +58,10 @@
                 &mkp LCLK
                 &mkp RCLK
                 &mkp MCLK
-                &lt_mkp 1 MBTN4
+                &lt_mkp 1 MB4
                 &bt_mode 0 0
             >;
-            sensor-bindings = <&rot_msc SCRL_DOWN SCRL_UP>;
+            sensor-bindings = <&rot_msc_v SCRL_DOWN SCRL_UP>;
         };
 
         scroll_layer {
@@ -67,7 +72,7 @@
                 &trans
                 &trans
             >;
-            sensor-bindings = <&rot_msc SCRL_RIGHT SCRL_LEFT>;
+            sensor-bindings = <&rot_msc_h SCRL_RIGHT SCRL_LEFT>;
         };
     };
 };
