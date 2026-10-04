@@ -3,20 +3,18 @@
         zmk,kscan = &kscan0;
     };
 
-    /* SW1〜SW5 のピン定義 (D0〜D4: 内部プルアップ・押すとGND) */
     kscan0: kscan {
         compatible = "zmk,kscan-gpio-direct";
         wakeup-source;
         input-gpios
-            = <&xiao_d 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW1: BTN_LEFT (D0) */
-            , <&xiao_d 1 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW2: BTN_RIGHT (D1) */
-            , <&xiao_d 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW3: BTN_MIDDLE (D2) */
-            , <&xiao_d 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW4: BTN_SIDE (D3) */
-            , <&xiao_d 4 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW5: BTN_MODE (D4) */
+            = <&xiao_d 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+            , <&xiao_d 1 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+            , <&xiao_d 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+            , <&xiao_d 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+            , <&xiao_d 4 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
             ;
     };
 
-    /* SW6 ロータリーエンコーダのピン定義 (D5, D6) */
     left_encoder: encoder_left {
         compatible = "alps,ec11";
         a-gpios = <&xiao_d 5 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
