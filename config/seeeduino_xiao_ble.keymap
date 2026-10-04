@@ -4,8 +4,21 @@
 #include <dt-bindings/zmk/pointing.h>
 
 / {
+    macros {
+        bt_nxt_macro: bt_nxt_macro {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&bt BT_NXT>;
+        };
+        bt_clr_macro: bt_clr_macro {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&bt BT_CLR>;
+        };
+    };
+
     behaviors {
-        /* サイドボタン用: 長押しでレイヤー切替(&mo)、短押しでマウスボタン(&mkp) */
+        /* サイドボタン用: 押しながらでレイヤー1(&mo)、短押しでマウスボタン(&mkp) */
         lt_mkp: layer_tap_mouse_kp {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
@@ -14,13 +27,21 @@
             bindings = <&mo>, <&mkp>;
         };
 
-        /* モードボタン用: 2秒長押しでBTクリア、短押しでBT切替 */
+        /* モードボタン用: 2秒長押しでペアリング解除、短押しで次の接続先へ */
         bt_mode: bt_mode_hold_tap {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
             flavor = "tap-preferred";
             tapping-term-ms = <2000>;
-            bindings = <&bt>, <&bt>;
+            bindings = <&bt_clr_macro>, <&bt_nxt_macro>;
+        };
+
+        /* ホイール縦・横スクロール用（エンコーダ回転） */
+        rot_msc: sensor_rotate_msc {
+            compatible = "zmk,behavior-sensor-rotate-var";
+            #sensor-binding-cells = <2>;
+            bindings = <&msc>, <&msc>;
+            tap-ms = <20>;
         };
     };
 
@@ -32,10 +53,10 @@
                 &mkp LCLK
                 &mkp RCLK
                 &mkp MCLK
-                &lt_mkp 1 MB4
-                &bt_mode BT_CLR BT_NXT
+                &lt_mkp 1 MBTN4
+                &bt_mode 0 0
             >;
-            sensor-bindings = <&inc_dec_kp DOWN UP>;
+            sensor-bindings = <&rot_msc SCRL_DOWN SCRL_UP>;
         };
 
         scroll_layer {
@@ -46,7 +67,7 @@
                 &trans
                 &trans
             >;
-            sensor-bindings = <&inc_dec_kp RIGHT LEFT>;
+            sensor-bindings = <&rot_msc SCRL_RIGHT SCRL_LEFT>;
         };
     };
 };
