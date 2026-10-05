@@ -1,24 +1,28 @@
+#include <dt-bindings/zmk/matrix_transform.h>
+
 / {
     chosen {
         zmk,kscan = &kscan0;
     };
 
+    /* 5つのボタン設定 (D0〜D4) */
     kscan0: kscan {
         compatible = "zmk,kscan-gpio-direct";
         wakeup-source;
         input-gpios
-            = <&xiao_d 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
-            , <&xiao_d 1 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
-            , <&xiao_d 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
-            , <&xiao_d 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
-            , <&xiao_d 4 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+            = <&xiao_d 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW1: BTN_LEFT */
+            , <&xiao_d 1 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW2: BTN_RIGHT */
+            , <&xiao_d 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW3: BTN_MIDDLE */
+            , <&xiao_d 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW4: BTN_SIDE */
+            , <&xiao_d 4 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW5: BTN_MODE */
             ;
     };
 
+    /* ロータリーエンコーダ設定 (D5, D6) */
     left_encoder: encoder_left {
         compatible = "alps,ec11";
-        a-gpios = <&xiao_d 5 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
-        b-gpios = <&xiao_d 6 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+        a-gpios = <&xiao_d 5 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>; /* ENC_A */
+        b-gpios = <&xiao_d 6 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>; /* ENC_B */
         steps = <24>;
         status = "okay";
     };
@@ -27,5 +31,42 @@
         compatible = "zmk,keymap-sensors";
         sensors = <&left_encoder>;
         triggers-per-rotation = <12>;
+    };
+
+    /* PAW3395の移動データをZMKのマウスカーソルへ繋ぐリスナー */
+    paw3395_listener {
+        compatible = "zmk,input-listener";
+        device = <&pd0>;
+    };
+};
+
+/* XIAO標準のI2Cを無効化（ピン競合防止） */
+&i2c0 {
+    status = "disabled";
+};
+
+/* SPI2通信とPAW3395センサーの設定 (SCK=D8, MISO=D9, MOSI=D10, CS=D7, IRQ=NFC1) */
+&spi2 {
+    compatible = "nordic,nrf-spim";
+    status = "okay";
+    cs-gpios = <&xiao_d 7 GPIO_ACTIVE_LOW>; /* D7 (P1.12): nCS */
+
+    pd0: pd@0 {
+        compatible = "pixart,paw3395";
+        status = "okay";
+        label = "MOU0";
+        reg = <0>;
+        spi-max-frequency = <4000000>;
+
+        /* MOTIONピン: NFC1 (P0.09) */
+        irq-gpios = <&gpio0 9 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+
+        /* マウス感度 (DPI/CPI) の初期値 */
+        cpi = <800>;
+
+        /* 基板の向きに合わせて後からカーソル方向を調整するオプション（必要時にコメント解除） */
+        // swap-xy;
+        // invert-x;
+        // invert-y;
     };
 };
