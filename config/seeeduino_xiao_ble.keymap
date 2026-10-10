@@ -4,21 +4,8 @@
 #include <dt-bindings/zmk/pointing.h>
 
 / {
-    macros {
-        bt_nxt_m: bt_nxt_macro {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <&bt BT_NXT>;
-        };
-
-        bt_clr_m: bt_clr_macro {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <&bt BT_CLR>;
-        };
-    };
-
     behaviors {
+        // マウスボタンとレイヤー切り替えの併用（SW4用）
         lt_mkp: layer_tap_mouse_kp {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
@@ -27,12 +14,13 @@
             bindings = <&mo>, <&mkp>;
         };
 
-        bt_mode: bt_mode_hold_tap {
+        // BLEプロファイル切り替え用：短押しで次へ(NXT)、長押しで削除(CLR)
+        bt_ht: bluetooth_hold_tap {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
-            flavor = "tap-preferred";
-            tapping-term-ms = <2000>;
-            bindings = <&bt_clr_m>, <&bt_nxt_m>;
+            flavor = "hold-preferred"; /* 長押しを確実に判定 */
+            tapping-term-ms = <2000>;  /* 2.0秒長押しでペアリング解除 */
+            bindings = <&bt>, <&bt>;
         };
 
         rot_msc_v: sensor_rotate_msc_v {
@@ -54,17 +42,19 @@
         compatible = "zmk,keymap";
 
         default_layer {
+            // ピン配置順: SW1(L), SW2(R), SW3(M), SW4(Side), SW5(Mode)
             bindings = <
                 &mkp LCLK
                 &mkp RCLK
                 &mkp MCLK
-                &lt_mkp 1 MB4
-                &bt_mode 0 0
+                &lt_mkp 1 MB4         // 短押し: 戻るボタン, 長押し: scroll_layerへ
+                &bt_ht BT_CLR BT_NXT  // 短押し: プロファイル切替, 長押し(2.0秒): ペアリング解除
             >;
             sensor-bindings = <&rot_msc_v SCRL_DOWN SCRL_UP>;
         };
 
         scroll_layer {
+            // SW4長押し中に呼び出されるレイヤー（横スクロール用）
             bindings = <
                 &trans
                 &trans
